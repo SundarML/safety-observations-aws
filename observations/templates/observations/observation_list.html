@@ -6,12 +6,16 @@
     <a href="{% url 'observations:create' %}" class="btn btn-success">Report New</a>
   </div>
 
-  <form method="get" class="mb-3">
-    <div class="input-group">
-      <input class="form-control" name="q" placeholder="Search title..." value="{{ request.GET.q }}">
-      <button class="btn btn-outline-secondary" type="submit">Search</button>
-    </div>
-  </form>
+<form method="get" class="row mb-3">
+  <div class="col-md-4">
+      <input type="text" name="q" value="{{ q }}" class="form-control"
+              placeholder="Search observations...">
+  </div>
+  <div class="col-md-2">
+      <button type="submit" class="btn btn-primary w-100">Search</button>
+  </div>
+</form>
+
 
   <div class="mb-3">
     <a href="{% url 'observations:export_observations_csv' %}" class="btn btn-sm btn-success">
@@ -23,22 +27,109 @@
     </a>
   </div>
 
-  <div class="list-group">
-    {% for obs in observations %}
-      <a href="{% url 'observations:detail' obs.pk %}" class="list-group-item list-group-item-action">
-        <div class="d-flex w-100 justify-content-between">
-          <h5 class="mb-1">{{ obs.title }}</h5>
-          <small>{{ obs.date_observed|date:"Y-m-d H:i" }}</small>
-        </div>
-        <p class="mb-1">{{ obs.description|truncatechars:120 }}</p>
-        <small>Severity: {{ obs.get_severity_display }} • Status: {{ obs.get_status_display }} • Location: {{ obs.location }}</small>
-      </a>
-    {% empty %}
-      <div class="alert alert-info">No observations found.</div>
-    {% endfor %}
-  </div>
+  <table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Location</th>
+            <th>Created By</th>
+            <th>Status</th>
+            <th>Created On</th>
+            <th>Target Date</th>
+            <th>Action</th>
+            
+        </tr>
+    </thead>
 
-  <div class="mt-3">
-    <!-- pagination could go here -->
-  </div>
+    <tbody>
+        {% for obs in observations %}
+            <tr class="{% if obs.target_date < today %}table-danger fw-bold{% endif %}">
+                <td>{{ obs.id }}</td>
+                <td>{{ obs.title }}</td>
+                <td>{{ obs.location.name }}</td>
+                <td>{{ obs.observer.username }}</td>
+                <td>{{ obs.status }}</td>
+                <td>{{ obs.date_observed|date:"Y-m-d H:i" }}</td>
+                <td>{{ obs.target_date}}</td>
+                <td>
+                    <a href="{% url 'observations:detail' obs.id %}" class="btn btn-sm btn-info" title="View">
+                        <i class="bi bi-eye-fill"></i> 
+                    </a>
+                    {% if request.user.is_manager or request.user.is_superuser %}
+                      <a href="{% url 'observations:archive' obs.id %}"
+                        class="btn btn-sm btn-warning"
+                        title="Archive"
+                        onclick="return confirm('Archive this observation?');">
+                          <i class="bi bi-archive"></i>
+
+                      <a href="{% url 'observations:delete' obs.id %}"
+                        class="btn btn-sm btn-danger"
+                        title="Delete observation?"
+                        onclick="return confirm('Are you sure you want to delete this observation? This action cannot be undone.');">
+                          <i class="bi bi-trash-fill"></i>
+                    {% endif %}
+                    </a>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">No results found</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<nav aria-label="Page navigation">
+  <ul class="pagination justify-content-center">
+
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?q={{ q }}&page=1">First</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?q={{ q }}&page={{ page_obj.previous_page_number }}">Previous</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">First</span>
+      </li>
+      <li class="page-item disabled">
+        <span class="page-link">Previous</span>
+      </li>
+    {% endif %}
+
+    <!-- Page numbers -->
+    {% for num in page_obj.paginator.page_range %}
+      {% if num == page_obj.number %}
+        <li class="page-item active">
+          <span class="page-link">{{ num }}</span>
+        </li>
+      {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+        <li class="page-item">
+          <a class="page-link" href="?q={{ q }}&page={{ num }}">{{ num }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?q={{ q }}&page={{ page_obj.next_page_number }}">Next</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?q={{ q }}&page={{ page_obj.paginator.num_pages }}">Last</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">Next</span>
+      </li>
+      <li class="page-item disabled">
+        <span class="page-link">Last</span>
+      </li>
+    {% endif %}
+
+  </ul>
+</nav>
+
+
 {% endblock %}

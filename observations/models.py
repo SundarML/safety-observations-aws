@@ -5,6 +5,7 @@ from django.db import models
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 class Location(models.Model):
     name = models.CharField(max_length=200)
@@ -42,6 +43,7 @@ class Observation(models.Model):
     photo_after = models.ImageField(upload_to='observations/after/', blank=True, null=True)
     date_closed = models.DateTimeField(null=True, blank=True)
     verification_comment = models.TextField(blank=True, null=True)
+    is_archived = models.BooleanField(default=False)
 
     def close(self):
         self.status = 'CLOSED'

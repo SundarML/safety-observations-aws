@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card border-danger">
+  <div class="card-body text-center">
+    <h4 class="text-danger">⚠ Permanent Delete</h4>
+
+    <p>
+      Are you sure you want to permanently delete:
+    </p>
+
+    <p class="fw-bold">{{ observation.title }}</p>
+
+    <p class="text-danger">
+      This action cannot be undone.
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+      <a href="{% url 'observations:observation_list' %}" class="btn btn-secondary">
+        Cancel
+      </a>
+      <button type="submit" class="btn btn-danger">
+        Yes, Delete Permanently
+      </button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

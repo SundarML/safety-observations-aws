@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>📊 Observations Dashboard</h2>
+
+<!-- Auto-refresh every 30 sec -->
+<meta http-equiv="refresh" content="30">
+
+<hr>
+
+<!-- =================== FILTERS =================== -->
+<form method="get" class="row g-3 mb-4">
+
+    <div class="col-md-3">
+        <label class="form-label">Start Date</label>
+        <input type="date" name="start_date" value="{{ start_date }}"
+               class="form-control">
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">End Date</label>
+        <input type="date" name="end_date" value="{{ end_date }}"
+               class="form-control">
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Location</label>
+        <select name="location" class="form-control">
+            <option value="all">All</option>
+            {% for loc in locations %}
+                <option value="{{ loc.id }}"
+                    {% if location_id == loc.id|stringformat:"s" %}selected{% endif %}>
+                    {{ loc.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="col-md-3 d-flex align-items-end">
+        <button class="btn btn-primary w-100">Apply Filters</button>
+    </div>
+</form>
+
+<!-- =================== KPI CARDS =================== -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white p-3">
+            <h4>Total: {{ total_obs }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark p-3">
+            <h4>Open: {{ open_obs }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-success text-white p-3">
+            <h4>Closed: {{ closed_obs }}</h4>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-danger text-white p-3">
+            <h4>Overdue: {{ overdue_obs }}</h4>
+        </div>
+    </div>
+</div>
+
+<!-- =================== GRAPHS =================== -->
+<div class="mb-3 d-flex justify-content-end">
+    <a href="?export_png=severity" class="btn btn-sm btn-outline-dark me-2">Export Severity PNG</a>
+    <a href="?export_png=status" class="btn btn-sm btn-outline-dark me-2">Export Status PNG</a>
+    <a href="?export_png=monthly" class="btn btn-sm btn-outline-dark">Export Monthly PNG</a>
+</div>
+
+<!-- Severity -->
+<div onclick="window.location='?drill_severity=LOW'" style="cursor:pointer;">
+    {{ severity_plot|safe }}
+</div>
+
+<!-- Status Pie -->
+{{ status_plot|safe }}
+
+<!-- Monthly Trends -->
+{{ monthly_plot|safe }}
+
+<hr>
+
+<!-- =================== DRILL DOWN TABLE =================== -->
+{% if drill_data %}
+<h3>🔍 Drill-down: {{ drill_severity }}</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th><th>Title</th><th>Status</th><th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obs in drill_data %}
+            <tr>
+                <td>{{ obs.id }}</td>
+                <td>{{ obs.title }}</td>
+                <td>{{ obs.status }}</td>
+                <td>{{ obs.date_observed|date:"Y-m-d" }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% endblock %}
