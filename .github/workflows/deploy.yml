@@ -1,4 +1,4 @@
-name: Deploy-to-EC2
+name: Deploy_to_EC2
 
 on:
   push:
