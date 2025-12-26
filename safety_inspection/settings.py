@@ -88,8 +88,12 @@ WSGI_APPLICATION = 'safety_inspection.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'observations',
+        'USER': 'lenovo',
+        'PASSWORD': 'abc123456',
+        'HOST': 'database-1.cjyey2s4gw3y.ap-southeast-2.rds.amazonaws.com',
+        'PORT': '5432',
     }
 }
 # database_url = os.environ.get('DATABASE_URL')
@@ -100,6 +104,9 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
+
+# AWS DB settings
+#
 
 AUTH_PASSWORD_VALIDATORS = [
     {
