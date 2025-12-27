@@ -12,12 +12,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # --- START OF DEBUG CODE ---
+      - name: Debug Secret Visibility
+        run: |
+          if [ -z "$SSH_KEY_SECRET" ]; then
+            echo "❌ ERROR: EC2_SSH_KEY IS EMPTY. Check your GitHub Repository Secrets."
+            exit 1
+          else
+            echo "✅ SUCCESS: EC2_SSH_KEY FOUND."
+          fi
+        env:
+          SSH_KEY_SECRET: ${{ secrets.EC2_SSH_KEY }}
+      # --- END OF DEBUG CODE ---
+
       - name: Execute remote ssh commands
         uses: appleboy/ssh-action@master
         with:
-          host: 52.64.205.14
+          host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
           script: |
             chmod +x /home/ubuntu/deploy.sh
             /home/ubuntu/deploy.sh
