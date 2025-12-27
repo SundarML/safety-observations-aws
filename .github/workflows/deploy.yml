@@ -5,5 +5,5 @@ with:
     username: ${{ secrets.EC2_USERNAME }}
     key: ${{ secrets.EC2_SSH_KEY }}
     script: |
-    chmod +x /home/ubuntu/deploy.sh
-    /home/ubuntu/deploy.sh
+        chmod +x /home/ubuntu/deploy.sh
+        /home/ubuntu/deploy.sh
