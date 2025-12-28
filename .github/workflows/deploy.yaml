@@ -2,21 +2,15 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Debug secrets
-        run: |
-          if [ -z "${{ secrets.EC2_HOST }}" ]; then echo "❌ EC2_HOST is EMPTY"; else echo "✅ EC2_HOST OK"; fi
-          if [ -z "${{ secrets.EC2_USERNAME }}" ]; then echo "❌ EC2_USERNAME is EMPTY"; else echo "✅ EC2_USERNAME OK"; fi
-          if [ -z "${{ secrets.EC2_SSH_KEY }}" ]; then echo "❌ EC2_SSH_KEY is EMPTY"; else echo "✅ EC2_SSH_KEY OK"; fi
 
       - name: Execute remote ssh commands
         uses: appleboy/ssh-action@master
@@ -26,5 +20,5 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            echo "Connected to EC2"
-            whoami
+            chmod +x /home/ubuntu/deploy.sh
+            /home/ubuntu/deploy.sh
