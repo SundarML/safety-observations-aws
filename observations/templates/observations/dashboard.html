@@ -68,20 +68,48 @@
     </div>
 </div>
 
-<!-- =================== GRAPHS =================== -->
-<div class="mb-3 d-flex justify-content-end">
-    <a href="?export_png=severity" class="btn btn-sm btn-outline-dark me-2">Export Severity PNG</a>
-    <a href="?export_png=status" class="btn btn-sm btn-outline-dark me-2">Export Status PNG</a>
-    <a href="?export_png=monthly" class="btn btn-sm btn-outline-dark">Export Monthly PNG</a>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h5 class="mb-3">Observation Trends</h5>
+
+    <!-- Trend selector -->
+    <form method="get" class="mb-3">
+      <select name="trend" class="form-select w-auto d-inline"
+              onchange="this.form.submit()">
+        <option value="daily" {% if trend == "daily" %}selected{% endif %}>Daily</option>
+        <option value="weekly" {% if trend == "weekly" %}selected{% endif %}>Weekly</option>
+        <option value="monthly" {% if trend == "monthly" %}selected{% endif %}>Monthly</option>
+      </select>
+    </form>
+
+    <!-- Plotly Chart -->
+    {{ chart_html|safe }}
+
+  </div>
 </div>
 
+
+
+
+
+
+<!-- =================== GRAPHS =================== -->
+
+<div class="mb-3 d-flex justify-content-end">
+    <small class="text-muted">
+        Use camera icon on graphs to download PNG
+    </small>
+</div>
 <!-- Severity -->
 <div onclick="window.location='?drill_severity=LOW'" style="cursor:pointer;">
     {{ severity_plot|safe }}
 </div>
 
+<div class="mt-4">
 <!-- Status Pie -->
 {{ status_plot|safe }}
+</div>
 
 <!-- Monthly Trends -->
 {{ monthly_plot|safe }}

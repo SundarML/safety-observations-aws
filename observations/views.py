@@ -11,7 +11,8 @@ from .models import Observation
 from .forms import ObservationCreateForm, RectificationForm, VerificationForm
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Count
+from django.db.models.functions import TruncMonth, TruncDay, TruncWeek 
 from .models import Location
 from .forms import LocationForm
 from django.http import JsonResponse
@@ -317,7 +318,7 @@ def ajax_add_location(request):
 
 # Dashboard view
 
-import pandas as pd
+# import pandas as pd
 import plotly.express as px
 from plotly.io import to_image
 from django.http import HttpResponse
@@ -328,112 +329,124 @@ from datetime import datetime
 
 @login_required
 def observations_dashboard(request):
+    """
+    Clean, database-safe dashboard view
+    """
 
-    # =========================================================================
-    # 1. Read Filter Values
-    # =========================================================================
-    start_date = request.GET.get("start_date")
-    end_date = request.GET.get("end_date")
-    location_id = request.GET.get("location")
-
+    # -------------------------------
+    # 1. Base queryset (ACTIVE ONLY)
+    # -------------------------------
     qs = Observation.objects.filter(is_archived=False)
 
-    if start_date:
-        qs = qs.filter(date_observed__date__gte=start_date)
-    if end_date:
-        qs = qs.filter(date_observed__date__lte=end_date)
-    if location_id and location_id != "all":
-        qs = qs.filter(location_id=location_id)
+    today = date.today()
 
-    # =========================================================================
-    # 2. KPI Cards
-    # =========================================================================
+    # -------------------------------
+    # 2. KPI CARDS (SAFE)
+    # -------------------------------
     total_obs = qs.count()
-    open_obs = qs.filter(status="OPEN").count()
+
+    open_obs = qs.filter(status__in=["OPEN", "IN_PROGRESS"]).count()
+
     closed_obs = qs.filter(status="CLOSED").count()
-    overdue_obs = qs.filter(target_date__lt=datetime.today().date()).exclude(status="CLOSED" ).count()
 
-    # =========================================================================
-    # 3. Aggregated Data
-    # =========================================================================
-    severity_df = pd.DataFrame(list(qs.values("severity").annotate(total=Count("id"))))
-    status_df = pd.DataFrame(list(qs.values("status").annotate(total=Count("id"))))
+    overdue_obs = qs.filter(
+        target_date__lt=today
+    ).exclude(status="CLOSED").count()
 
-    monthly_df = (
-        qs.extra(select={"month": "strftime('%%Y-%%m', date_observed)"})
-        .values("month")
-        .annotate(total=Count("id"))
-        .order_by("month")
+    # -------------------------------
+    # 3. Trend selector (GET param)
+    # -------------------------------
+    trend = request.GET.get("trend", "monthly")
+
+    trunc_map = {
+        "daily": TruncDay("date_observed"),
+        "weekly": TruncWeek("date_observed"),
+        "monthly": TruncMonth("date_observed"),
+    }
+
+    trunc_func = trunc_map.get(trend, TruncMonth("date_observed"))
+
+    # -------------------------------
+    # 4. Trend aggregation (DB SAFE)
+    # -------------------------------
+    trend_qs = (
+        qs.annotate(period=trunc_func)
+          .values("period")
+          .annotate(count=Count("id"))
+          .order_by("period")
     )
-    monthly_df = pd.DataFrame(list(monthly_df))
 
-    # =========================================================================
-    # 4. Drill-down: If user clicks severity bar → show table
-    # =========================================================================
-    drill_severity = request.GET.get("drill_severity")
-    drill_data = None
-    if drill_severity:
-        drill_data = qs.filter(severity=drill_severity)
+    # -------------------------------
+    # 5. Prepare Plotly data
+    # -------------------------------
+    labels = [
+        row["period"].strftime("%Y-%m-%d") for row in trend_qs if row["period"]
+    ]
+    values = [row["count"] for row in trend_qs]
 
-    # =========================================================================
-    # 5. Plotly Charts
-    # =========================================================================
+    fig = px.line(
+        x=labels,
+        y=values,
+        markers=True,
+        title=f"{trend.capitalize()} Observation Trend",
+        labels={"x": "Date", "y": "Observations"}
+    )
+    fig.update_layout(modebar_add=["toImage"])
 
-    # Severity Chart
-    fig_severity = px.bar(severity_df, x="severity", y="total",
-                          title="Observations by Severity")
-    severity_plot = fig_severity.to_html(full_html=False)
+    chart_html = fig.to_html(full_html=False)
 
-    # Status Pie Chart
-    fig_status = px.pie(status_df, names="status", values="total",
-                        title="Status Distribution")
-    status_plot = fig_status.to_html(full_html=False)
+    severity_qs = (
+    qs.values("severity")
+      .annotate(count=Count("id"))
+      .order_by("severity")
+    )
 
-    # Monthly Trends
-    fig_monthly = px.line(monthly_df, x="month", y="total",
-                          markers=True, title="Monthly Trend")
-    monthly_plot = fig_monthly.to_html(full_html=False)
+    severity_labels = [row["severity"] for row in severity_qs]
+    severity_values = [row["count"] for row in severity_qs]
 
-    # =========================================================================
-    # 6. Export PNG Feature
-    # =========================================================================
-    if request.GET.get("export_png"):
-        fig_name = request.GET.get("export_png")
-        fig_map = {
-            "severity": fig_severity,
-            "status": fig_status,
-            "monthly": fig_monthly,
-        }
-        fig = fig_map.get(fig_name)
-        if fig:
-            png_bytes = to_image(fig, format="png")
-            response = HttpResponse(png_bytes, content_type="image/png")
-            response["Content-Disposition"] = f'attachment; filename="{fig_name}.png"'
-            return response
+    severity_fig = px.bar(
+        x=severity_labels,
+        y=severity_values,
+        title="Observations by Severity",
+        labels={"x": "Severity", "y": "Count"},
+    )
 
-    # =========================================================================
-    # 7. Send to Template
-    # =========================================================================
-    return render(request, "observations/dashboard.html", {
-        "severity_plot": severity_plot,
-        "status_plot": status_plot,
-        "monthly_plot": monthly_plot,
+    severity_fig.update_layout(modebar_add=["toImage"])
+    severity_plot = severity_fig.to_html(full_html=False)
 
-        # KPI cards
+    status_qs = (
+    qs.values("status")
+      .annotate(count=Count("id"))
+    )
+
+    status_labels = [row["status"] for row in status_qs]
+    status_values = [row["count"] for row in status_qs]
+
+    status_fig = px.pie(
+        names=status_labels,
+        values=status_values,
+        title="Observations by Status",
+    )
+
+    status_fig.update_layout(modebar_add=["toImage"])
+    status_plot = status_fig.to_html(full_html=False)
+
+
+    # -------------------------------
+    # 6. Final context
+    # -------------------------------
+    context = {
         "total_obs": total_obs,
         "open_obs": open_obs,
         "closed_obs": closed_obs,
         "overdue_obs": overdue_obs,
+        "chart_html": chart_html,
+        "trend": trend,
+        "severity_plot": severity_plot,
+        "status_plot": status_plot,
+    }
 
-        # filters
-        "start_date": start_date,
-        "end_date": end_date,
-        "location_id": location_id,
-        "locations": Location.objects.all(),
+    return render(request, "observations/dashboard.html", context)
 
-        # drill-down
-        "drill_severity": drill_severity,
-        "drill_data": drill_data,
-    })
 
 
