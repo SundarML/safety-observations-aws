@@ -11,3 +11,8 @@ env/
 
 # Ignore local environment variables
 .env
+
+# Ignore user-uploaded media
+media/
+# Ignore collected static files
+staticfiles/
