@@ -34,6 +34,7 @@
             <th>Title</th>
             <th>Location</th>
             <th>Created By</th>
+            <th>Assigned To</th>
             <th>Status</th>
             <th>Created On</th>
             <th>Target Date</th>
@@ -49,6 +50,7 @@
                 <td>{{ obs.title }}</td>
                 <td>{{ obs.location.name }}</td>
                 <td>{{ obs.observer.username }}</td>
+                <td>{{ obs.assigned_to.username }}</td>
                 <td>{{ obs.status }}</td>
                 <td>{{ obs.date_observed|date:"Y-m-d H:i" }}</td>
                 <td>{{ obs.target_date}}</td>
