@@ -10,6 +10,93 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   </head>
+
+  <div class="modal fade" id="helpModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">📘 Safety Observation System – Help Guide</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <h5>🔍 What is this application?</h5>
+        <p>
+          The <strong>Safety Observation System</strong> is a digital platform to
+          record, track, rectify, and verify safety observations across locations.
+          It replaces manual registers, emails, and follow-ups with a single
+          transparent system.
+        </p>
+
+        <hr>
+
+        <h5>🔄 Typical Workflow</h5>
+        <ol>
+          <li><strong>Observe</strong> – An observer reports a safety issue.</li>
+          <li><strong>Assign</strong> – The issue is assigned to an action owner.</li>
+          <li><strong>Rectify</strong> – Corrective action is performed with proof.</li>
+          <li><strong>Verify</strong> – Safety manager verifies and closes it.</li>
+          <li><strong>Track</strong> – Dashboard shows trends, overdue items, KPIs.</li>
+        </ol>
+
+        <hr>
+
+        <h5>👥 User Roles</h5>
+        <ul>
+          <li><strong>Observer</strong> – Reports safety observations.</li>
+          <li><strong>Action Owner</strong> – Performs corrective actions.</li>
+          <li><strong>Safety Manager</strong> – Verifies, closes, archives records.</li>
+          <li><strong>Admin</strong> – Manages users, master data, system setup.</li>
+        </ul>
+
+        <hr>
+
+        <h5>📊 Key Features</h5>
+        <ul>
+          <li>📷 Photo evidence (Before & After)</li>
+          <li>📅 Target dates & overdue highlighting</li>
+          <li>📈 Dashboard with trends & KPIs</li>
+          <li>📁 Archive & restore observations</li>
+          <li>📤 CSV / Excel exports</li>
+          <li>🔐 Role-based access control</li>
+        </ul>
+
+        <hr>
+
+        <h5>🎯 Why use this application?</h5>
+        <ul>
+          <li>Improves safety visibility</li>
+          <li>Ensures accountability</li>
+          <li>Reduces incidents & risks</li>
+          <li>Provides audit-ready records</li>
+          <li>Eliminates manual follow-ups</li>
+        </ul>
+
+        <hr>
+
+        <h5>🚀 Benefits to the Organization</h5>
+        <ul>
+          <li>✔ Faster issue resolution</li>
+          <li>✔ Data-driven safety decisions</li>
+          <li>✔ Compliance & audit readiness</li>
+          <li>✔ Strong safety culture</li>
+        </ul>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
   <body>
     <nav class="navbar navbar-expand-lg bg-light border-bottom shadow-sm">
       <div class="container">
@@ -116,6 +203,14 @@
                 </a>
               </li>
             {% endif %}
+          </ul>
+          <ul>
+            <button class="btn btn-outline-info btn-sm ms-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#helpModal">
+                  ❓ Help
+            </button>
+
           </ul>
         </div>
       </div>

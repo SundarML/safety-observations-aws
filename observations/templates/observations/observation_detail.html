@@ -15,9 +15,28 @@
       {% if object.photo_before %}
         <div class="mb-3">
           <strong>Before:</strong><br>
-          <img src="{{ object.photo_before.url }}" alt="before" class="img-fluid" style="max-width:320px;">
+          <img src="{{ object.photo_before.url }}" 
+               alt="before" 
+               class="img-thumbnail"
+               style="max-width:200px; cursor:zoom-in;"
+               data-bs-toggle="modal"
+               data-bs-target="#beforeImageModal">
         </div>
       {% endif %}
+      <!-- Modal for Before Image -->
+      <div class="modal fade" id="beforeImageModal" tabindex="-1" aria-labelledby="beforeImageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="beforeImageModalLabel">Before Rectification</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+              <img src="{{ object.photo_before.url }}" alt="before" class="img-fluid">
+            </div>
+          </div>
+        </div>
+      </div>
 
       <p><strong>Assigned to:</strong> {{ object.assigned_to }}</p>
       <p><strong>Target date:</strong> {{ object.target_date }}</p>
@@ -30,9 +49,29 @@
         {% if object.photo_after %}
           <div class="mb-3">
             <strong>After:</strong><br>
-            <img src="{{ object.photo_after.url }}" alt="after" class="img-fluid" style="max-width:320px;">
+            <img src="{{ object.photo_after.url }}"
+                 alt="after"
+                 class="img-thumbnail"
+                 style="max-width:200px; cursor:zoom-in;"
+                 data-bs-toggle="modal"
+                 data-bs-target="#afterImageModal">
           </div>
         {% endif %}
+        <!-- Modal for After Image -->
+        <div class="modal fade" id="afterImageModal" tabindex="-1" aria-labelledby="afterImageModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="afterImageModalLabel">After Rectification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body text-center">
+                <img src="{{ object.photo_after.url }}" alt="after" class="img-fluid">
+              </div>
+            </div>
+          </div>
+        </div>
+        
       {% else %}
         <p class="text-muted">No rectification details yet.</p>
       {% endif %}
