@@ -48,20 +48,14 @@ class ObservationCreateView(LoginRequiredMixin,  CreateView):
         form.instance.status = 'OPEN'
         return super().form_valid(form)
 
-# Uncomment below to use class-based list view
-# class ObservationListView(LoginRequiredMixin, ListView):
-#     model = Observation
-#     template_name = 'observations/observation_list.html'
-#     context_object_name = 'observations'
 
-#     def get_queryset(self):
-#         qs = super().get_queryset().select_related('location','assigned_to')
-#         q = self.request.GET.get('q')
-#         if q:
-#             qs = qs.filter(title__icontains=q)
-#         return qs.order_by('-date_observed')
+# observations/views.py (add near top imports)
 
-#observations list view function 
+def home_view(request):
+    """Lightweight marketing-style homepage"""
+    return render(request, "home.html", {})
+
+
 @login_required
 def observation_list(request):
     #----1. handle search query-----
@@ -127,15 +121,7 @@ class RectificationUpdateView(LoginRequiredMixin, IsAssignedOrManagerMixin, Upda
         observation = self.get_object()
         return self.request.user == observation.assigned_to
 
-    # def form_valid(self, form):
-    #     observation = form.save(commit=False)
-    #     observation.status = 'AWAITING VERIFICATION'
-    #     observation.save()
-    #     messages.success(self.request, "Rectification details submitted successfully, pending for verification!.")
-    #     return super().form_valid(form)
-
-
-
+   
 class VerificationView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Observation
     template_name = 'observations/observation_verify.html'
