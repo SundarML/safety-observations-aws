@@ -20,6 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from observations import views as obs_views
+from views import home_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,6 +30,7 @@ urlpatterns = [
     path('users/', include('users.urls')),  # user-facing endpoints (profile / simple)
     path('', obs_views.home_view, name='home'),  # Home page
     path('observations/', include('observations.urls', namespace='observations')),
+    path('', home_view, name='home'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

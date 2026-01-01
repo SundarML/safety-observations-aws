@@ -50,6 +50,8 @@ class ObservationCreateView(LoginRequiredMixin,  CreateView):
 
 
 # observations/views.py (add near top imports)
+def home_view(request): 
+    return render(request, "home.html", {})
 
 def home_view(request):
     """Lightweight marketing-style homepage"""
