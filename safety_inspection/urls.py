@@ -20,7 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from observations import views as obs_views
-from views import home_view
+from core.views import home_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
