@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Request a Demo{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 600px;">
+  <div class="card shadow-sm">
+    <div class="card-body">
+
+      <h3 class="mb-2">Request a Live Demo</h3>
+      <p class="text-muted">
+        See how Safety Observation can improve visibility, accountability,
+        and compliance across your organization.
+      </p>
+
+      <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+
+        <div class="d-flex justify-content-between mt-3">
+          <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+            Cancel
+          </a>
+          <button type="submit" class="btn btn-primary">
+            Request Demo
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

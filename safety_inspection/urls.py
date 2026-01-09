@@ -31,6 +31,7 @@ urlpatterns = [
     path('', obs_views.home_view, name='home'),  # Home page
     path('observations/', include('observations.urls', namespace='observations')),
     path('', home_view, name='home'),
+    path('', include('core.urls')),  # core app endpoints
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
