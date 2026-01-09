@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     # Local apps
     'users.apps.UsersConfig',
     'observations.apps.ObservationsConfig',
+    'core.apps.CoreConfig',
 ]
 
 MIDDLEWARE = [
