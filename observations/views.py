@@ -307,6 +307,7 @@ def ajax_add_location(request):
 # import pandas as pd
 import plotly.express as px
 from plotly.io import to_image
+import plotly.io as pio
 from django.http import HttpResponse
 from django.db.models import Count, Q
 from django.shortcuts import render
@@ -417,6 +418,65 @@ def observations_dashboard(request):
     status_fig.update_layout(modebar_add=["toImage"])
     status_plot = status_fig.to_html(full_html=False)
 
+    #-------------------------------
+    # 7. Observer Performance
+    #-------------------------------
+    observer_qs = (
+        Observation.objects
+        .values("observer__username")
+        .annotate(total=Count("id"))
+        .filter(observer__isnull=False)
+        .order_by("-total")
+        )
+    observer_fig = px.bar(
+        observer_qs,
+        x="observer__username",
+        y="total",
+        title="Observers – Observations Reported",
+        labels={"observer__username": "Observer", "total": "Observations"},
+        color="total",
+        )
+
+    #---------------------------------
+    # 8. Action Owner Performance
+    #---------------------------------
+    owner_qs = (
+        Observation.objects
+        .values("assigned_to__username")
+        .annotate(total=Count("id"))
+        .filter(assigned_to__isnull=False)
+        .order_by("-total")
+    )
+
+    owner_fig = px.bar(
+        owner_qs,
+        x="assigned_to__username",
+        y="total",
+        title="Action Owners – Tasks Assigned",
+        labels={"assigned_to__username": "Action Owner", "total": "Assigned Tasks"},
+        color="total",
+    )
+
+    #--------------------------------
+    # 9. Safety Manager Performance
+    #--------------------------------
+    manager_qs = (
+        Observation.objects
+        .filter(status="CLOSED")
+        .values("assigned_to__username")
+        .annotate(total=Count("id"))
+        .order_by("-total")
+    )
+
+    manager_fig = px.bar(
+        manager_qs,
+        x="assigned_to__username",
+        y="total",
+        title="Safety Managers – Observations Closed",
+        labels={"assigned_to__username": "Manager", "total": "Closed Observations"},
+        color="total",
+    )
+
 
     # -------------------------------
     # 6. Final context
@@ -430,6 +490,9 @@ def observations_dashboard(request):
         "trend": trend,
         "severity_plot": severity_plot,
         "status_plot": status_plot,
+        "observer_plot": pio.to_html(observer_fig, full_html=False),
+        "owner_plot": pio.to_html(owner_fig, full_html=False),
+        "manager_plot": pio.to_html(manager_fig, full_html=False),
     }
 
     return render(request, "observations/dashboard.html", context)
