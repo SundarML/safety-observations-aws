@@ -20,6 +20,9 @@ class RectificationForm(forms.ModelForm):
     class Meta:
         model = Observation
         fields = ['description','photo_before','rectification_details','photo_after','target_date', 'location']
+        widgets = {"target_date": forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}), 
+        "photo_before": forms.FileInput(attrs={'class': 'form-control-file'}),
+        "photo_after": forms.FileInput(attrs={'class': 'form-control-file'})}
 
 class VerificationForm(forms.ModelForm):
     APPROVAL_CHOICES = [
